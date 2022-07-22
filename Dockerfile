@@ -1,4 +1,4 @@
-FROM docker pull nvcr.io/nvidia/pytorch:22.03-py3
+FROM nvcr.io/nvidia/pytorch:22.03-py3
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1

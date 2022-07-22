@@ -9,7 +9,7 @@ import torchaudio
 
 import config
 import util
-from mids_model import build_model
+from mids_model_cap import build_model
 
 
 def get_wav_for_path_pipeline(path_names, sr):
@@ -68,7 +68,7 @@ def write_output(
     feat_type="log-mel",
     n_feat=config.n_feat,
     win_size=config.win_size,
-    step_size=config.win_size,
+    step_size=config.step_size,
     n_hop=config.n_hop,
     sr=config.rate,
     norm_per_sample=config.norm_per_sample,
@@ -101,7 +101,7 @@ def write_output(
                 if debug:
                     print(filename + " signal length", x_l, (n_hop * win_size) / sr)
                 if x_l < (n_hop * step_size) / sr:
-                    print("Signal length too short, skipping:", x_l, filename)
+                    print("Signal length too short, skipping:", x_l, (n_hop * step_size) / sr, filename)
                 else:
                     #
                     frame_cnt = int(x[0].shape[1]//(step_size*n_hop))
@@ -216,6 +216,12 @@ def write_output(
 # -
 
 if __name__ == "__main__":
+    
+    config.NFFT = 1024
+    config.win_size = 360
+    config.n_hop = config.NFFT//8
+    config.step_size = config.win_size//3
+    
     parser = argparse.ArgumentParser(
         description="""This function writes the predictions of the model."""
     )
@@ -232,7 +238,7 @@ if __name__ == "__main__":
         "--model_weights_path",
         default=os.path.join(
             models_folder_path,
-            "No_Trainable_kernel_model_e0_2022_06_14_14_28_07.pth",
+            "model_e21_2022_06_20_12_22_10.pth",
         ),
         type=str,
         help="Path to model weights.",
@@ -241,7 +247,7 @@ if __name__ == "__main__":
         "--win_size", default=config.win_size, type=int, help="Window size."
     )
     parser.add_argument(
-        "--step_size", default=config.win_size, type=int, help="Step size."
+        "--step_size", default=config.step_size, type=int, help="Step size."
     )
     parser.add_argument(
         "--custom_threshold",

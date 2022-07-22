@@ -9,6 +9,7 @@ import torchaudio
 
 import config
 import util
+from mids_model_nomed import build_model
 
 
 def get_wav_for_path_pipeline(path_names, sr):
@@ -56,11 +57,12 @@ def get_output_file_name(
     )
 
 
+# +
 def write_output(
-    model,
     data_path,
     predictions_path,
     audio_format,
+    model_weights_path,
     det_threshold=np.arange(0.1, 1.1, 0.1),
     n_samples=10,
     feat_type="log-mel",
@@ -73,6 +75,10 @@ def write_output(
     batch_size=16,
     debug=False,
 ):
+    model = build_model()
+    model.load_weights(model_weights_path)
+    print("Loaded model:", model_weights_path)
+
     mozz_audio_list = []
 
     print("Processing:", data_path, "for audio format:", audio_format)
@@ -98,18 +104,26 @@ def write_output(
                     print("Signal length too short, skipping:", x_l, filename)
                 else:
                     #
-                    frame_cnt = x[0].shape[1]//(step_size*n_hop)
+                    frame_cnt = int(x[0].shape[1]//(step_size*n_hop))
 
-                    pad_amt = (win_size-step_size)*n_hop
-                    pad_l = torch.zeros(1,pad_amt) + (0.1**0.5)*torch.randn(1, pad_amt)
-                    pad_r = torch.zeros(1,pad_amt) + (0.1**0.5)*torch.randn(1, pad_amt)
-                    X = torch.cat([pad_l,x[0],pad_r],dim=1).unfold(1,win_size*n_hop,step_size*n_hop).transpose(0,1).to(device) # b, 1, s
+                    pad_amt = int((win_size-step_size)*n_hop)
+                    if pad_amt > 0:
+                        pad_l = torch.zeros(1,pad_amt) + (0.1**0.5)*torch.randn(1, pad_amt)
+                        pad_r = torch.zeros(1,pad_amt) + (0.1**0.5)*torch.randn(1, pad_amt)
+                        X = torch.cat([pad_l,x[0],pad_r],dim=1).unfold(1,int(win_size*n_hop),int(step_size*n_hop)).transpose(0,1).to(device) # b, 1, s
+                    else:
+                        X = x[0].unfold(1,int(win_size*n_hop),int(step_size*n_hop)).transpose(0,1).to(device) # b, 1, s
 
                     out = []
                     X_CNN = []
 
                     preds_batch = []
                     spec_batch = []
+#                     if filename == '206725.wav' or filename == '208065.wav':
+#                         print('len')
+#                         print(len(X.shape),X.shape)
+#                         print(batch_size)
+
                     for X_batch in torch.split(X,batch_size,0):
                         preds = model(X_batch)
                         preds_prod = softmax(preds['prediction']).cpu().detach()
@@ -119,13 +133,13 @@ def write_output(
                     out = torch.cat(preds_batch)
                     X_CNN.append(np.concatenate(spec_batch))
 
+#                     print(f":{frame_cnt}")
+
                     p = torch.cat([out[i:frame_cnt+i,1:2] for i in range(win_size//step_size)],dim=-1).mean(dim=1).numpy()
 
                     b_out = np.array([torch.cat([out[i:frame_cnt+i,0:1],out[i:frame_cnt+i,1:2]],dim=1).numpy() for i in range(win_size//step_size)])
 
                     G_X, U_X, _ = util.active_BALD(np.log(b_out), frame_cnt, 2)
-
-
 
 
 
@@ -140,9 +154,6 @@ def write_output(
                         os.makedirs(root_out)
 
                     # Iterate over threshold for threshold-independent metrics
-                    print('p')
-                    print(p)
-
                     for th in det_threshold:
                         #####
                         true_indexes = np.where(p>th)[0]
@@ -194,14 +205,15 @@ def write_output(
                             delimiter="\t",
                         )
                     print("Processed:", filename)
-    #             except Exception as e:
-    #                 print(
-    #                     "[ERROR] Unable to load {}, {} ".format(
-    #                         os.path.join(root, filename), e
-    #                     )
-    #                 )
+#                 except Exception as e:
+#                     print(
+#                         "[ERROR] Unable to load {}, {} ".format(
+#                             os.path.join(root, filename), e
+#                         )
+#                     )
 
     print("Total files of " + str(audio_format) + " format processed:", i_signal)
+# -
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -220,7 +232,7 @@ if __name__ == "__main__":
         "--model_weights_path",
         default=os.path.join(
             models_folder_path,
-            "Win_30_Stride_10_2022_04_27_18_45_11-e01val_accuracy0.9798.hdf5",
+            "model_e0_2022_06_05_18_21_52.pth",
         ),
         type=str,
         help="Path to model weights.",

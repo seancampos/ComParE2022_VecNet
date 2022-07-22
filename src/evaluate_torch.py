@@ -11,7 +11,7 @@ from sklearn.metrics import (average_precision_score,
 
 import config
 # new packages
-from predict_torch import \
+from predict import \
     write_output  # Importing predict.py -> will probably need to add to path
 
 
@@ -250,7 +250,7 @@ def evaluate_model_timestamp(
     data_dir,
     output_dir,
     n_samples,
-    model,
+    model_weights_path,
     win_size=config.win_size,
     step_size=config.win_size,
     n_hop=config.n_hop,
@@ -258,11 +258,11 @@ def evaluate_model_timestamp(
 ):
     print("Evaluating model:")
     write_output(
-        model,
         audio_format=audio_format,
         data_path=data_dir,
         predictions_path=output_dir,
         norm_per_sample=config.norm_per_sample,
+        model_weights_path=model_weights_path,
         win_size=win_size,
         step_size=step_size,
         n_hop=n_hop,
