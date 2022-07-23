@@ -18,9 +18,9 @@ In this paper, we demonstrate a unique recipe to enhance the effectiveness of au
 
 ```
 @inproceedings{
-khandelwal2022vecnet,
-title={VecNet: A Deep Learning Based Approach to Detect Mosquitoes},
-author={Devesh Khandelwal and Sean Campos and Shwetha Chitta Nagaraj and Fred Nugen and Alberto Todeschini},
+khandelwal2022deep,
+title={Deep Learning-Based Acoustic Mosquito Detection in Noisy Conditions Using Trainable Kernels and Augmentations},
+author={Devesh Khandelwal and Sean Michael Campos and Shwetha Chitta Nagaraj and Fred Nugen and Alberto Todeschini},
 booktitle={ACMMM 2022 Conference : Grand Challenges},
 year={2022},
 url={https://openreview.net/forum?id=VZ8ByJ9TveM}
