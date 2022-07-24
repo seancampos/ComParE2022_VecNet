@@ -2,7 +2,11 @@
 
 ## Deep Learning Based Acoustic Mosquito Detection in Noisy Conditions Using Trainable Kernels and Augmentations
 
-Sean Campos, Devesh Khandelwal, Shwetha C. Nagaraj
+[Sean Campos](https://github.com/seancampos), Devesh Khandelwal, Shwetha C. Nagaraj, [Fred Nugen](https://github.com/nooj), Alberto Todeschini
+
+Division of Computing, Data Science, and Society  
+School of Information  
+University of California, Berkeley
 
 ### Abstract
 
